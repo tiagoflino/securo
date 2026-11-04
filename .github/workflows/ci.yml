@@ -222,6 +222,9 @@ jobs:
   preview-images:
     name: Build preview images
     if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/preview-images.yml
     with:
       pr_number: ${{ inputs.pr_number }}
