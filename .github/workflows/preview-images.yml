@@ -1,0 +1,188 @@
+name: Securo Preview Images
+
+on:
+  schedule:
+    # Picks up new commits on pull requests already labelled "preview".
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to build (blank builds every labelled PR)
+        required: false
+        type: string
+      force:
+        description: Rebuild images even when the commit tag already exists
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: preview-images
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    name: Discover pull requests
+    if: github.repository == 'tiagoflino/securo'
+    runs-on: ubuntu-latest
+    outputs:
+      count: ${{ steps.plan.outputs.count }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Plan image builds
+        id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          repo = "securo-finance/securo"
+          pr_number = os.environ.get("PR_NUMBER", "").strip()
+          force = os.environ.get("FORCE", "").lower() == "true"
+
+          def gh_api(path):
+              result = subprocess.run(
+                  ["gh", "api", "--paginate", "--slurp", path],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              )
+              pages = json.loads(result.stdout)
+              return [item for page in pages for item in page]
+
+          if pr_number:
+              result = subprocess.run(
+                  ["gh", "api", f"repos/{repo}/pulls/{int(pr_number)}"],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              )
+              pulls = [json.loads(result.stdout)]
+          else:
+              pulls = gh_api(f"repos/{repo}/pulls?state=open&per_page=100")
+
+          include = []
+          for pull in pulls:
+              labels = {label["name"] for label in pull.get("labels", [])}
+              if not pr_number and "preview" not in labels:
+                  continue
+
+              number = pull["number"]
+              sha = pull["head"]["sha"]
+              short_sha = sha[:8]
+              tag = f"pr-{number}-{short_sha}"
+
+              def image_missing(image):
+                  if force:
+                      return True
+                  result = subprocess.run(
+                      ["docker", "manifest", "inspect", image],
+                      stdout=subprocess.DEVNULL,
+                      stderr=subprocess.DEVNULL,
+                  )
+                  return result.returncode != 0
+
+              backend_tag = f"ghcr.io/tiagoflino/securo-backend:{tag}"
+              frontend_tag = f"ghcr.io/tiagoflino/securo-frontend:{tag}"
+              build_backend = image_missing(backend_tag)
+              build_frontend = image_missing(frontend_tag)
+              if not build_backend and not build_frontend:
+                  continue
+
+              include.append({
+                  "number": number,
+                  "sha": sha,
+                  "short_sha": short_sha,
+                  "title": pull["title"],
+                  "backend": build_backend,
+                  "frontend": build_frontend,
+                  "backend_tag": backend_tag,
+                  "frontend_tag": frontend_tag,
+              })
+
+          matrix = {"include": include}
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"count={len(include)}\n")
+              output.write("matrix<<EOF\n")
+              output.write(json.dumps(matrix))
+              output.write("\nEOF\n")
+
+          print(f"{len(include)} pull request image set(s) need building")
+          for item in include:
+              print(f"  #{item['number']} {item['sha'][:8]} backend={item['backend']} frontend={item['frontend']}")
+          PY
+
+  build:
+    name: PR ${{ matrix.number }} images
+    needs: discover
+    if: needs.discover.outputs.count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+        with:
+          repository: securo-finance/securo
+          ref: refs/pull/${{ matrix.number }}/head
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend
+        if: matrix.backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ matrix.backend_tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/securo-finance/securo
+            org.opencontainers.image.revision=${{ matrix.sha }}
+          cache-from: type=gha,scope=preview-backend
+          cache-to: type=gha,mode=max,scope=preview-backend
+
+      - name: Build frontend
+        if: matrix.frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ matrix.frontend_tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/securo-finance/securo
+            org.opencontainers.image.revision=${{ matrix.sha }}
+          cache-from: type=gha,scope=preview-frontend
+          cache-to: type=gha,mode=max,scope=preview-frontend
