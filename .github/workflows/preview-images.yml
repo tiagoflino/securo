@@ -1,17 +1,12 @@
 name: Securo Preview Images
 
 on:
-  schedule:
-    # Picks up new commits on pull requests already labelled "preview".
-    - cron: "*/15 * * * *"
-  workflow_dispatch:
+  workflow_call:
     inputs:
       pr_number:
-        description: Pull request number to build (blank builds every labelled PR)
         required: false
         type: string
       force:
-        description: Rebuild images even when the commit tag already exists
         required: false
         default: false
         type: boolean

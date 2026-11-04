@@ -5,6 +5,17 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to build a preview image for
+        required: true
+        type: string
+      force:
+        description: Rebuild even when the commit tag already exists
+        required: false
+        default: false
+        type: boolean
 
 # Only superseded PR runs are cancelled; every main push is validated.
 concurrency:
@@ -207,3 +218,11 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
           helm template securo-test charts/securo | kubeconform -summary -strict
+
+  preview-images:
+    name: Build preview images
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/preview-images.yml
+    with:
+      pr_number: ${{ inputs.pr_number }}
+      force: ${{ inputs.force }}
