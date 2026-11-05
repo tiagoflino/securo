@@ -1,7 +1,7 @@
 """register physical and virtual cards under a credit-card account
 
-Revision ID: 087
-Revises: 086
+Revision ID: 104
+Revises: 103
 Create Date: 2026-08-30
 
 An account statement can aggregate several physical or virtual cards. The
@@ -15,8 +15,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "087"
-down_revision: Union[str, None] = "086"
+revision: str = "104"
+down_revision: Union[str, None] = "103"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -4,7 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { getAccountName, sortAccountsByDisplayName } from '@/lib/account-utils'
 import { isInvalidDescriptionAction, parseRulePriority, previewableActions } from '@/lib/rule-form-utils'
 import { rules as rulesApi } from '@/lib/api'
-import { formatCurrency } from '@/lib/format'
+import { formatSignedAmount } from '@/lib/format'
 import { useDisplayLocale, useDateLocale } from '@/hooks/use-display-locale'
 import { usePrivacyMode } from '@/hooks/use-privacy-mode'
 import { Input } from '@/components/ui/input'
@@ -41,6 +41,7 @@ const CONDITION_FIELDS = [
   { value: 'payee_id', label: 'rules.fieldPayee' },
   { value: 'card_masked_number', label: 'rules.fieldCardEnding' },
   { value: 'date', label: 'rules.fieldDate' },
+  { value: 'status', label: 'rules.fieldStatus' },
 ] as const
 
 const STRING_OPS = [
@@ -64,7 +65,7 @@ const NUMERIC_OPS = [
 function getOpsForField(field: string) {
   if (field === 'amount' || field === 'date') return NUMERIC_OPS
   if (field === 'type') return [{ value: 'equals', label: 'rules.opIs' }]
-  if (field === 'payee_id' || field === 'account_id' || field === 'card_masked_number') return [
+  if (field === 'payee_id' || field === 'account_id' || field === 'card_masked_number' || field === 'status') return [
     { value: 'equals', label: 'rules.opIs' },
     { value: 'not_equals', label: 'rules.opIsNot' },
   ]
@@ -72,7 +73,9 @@ function getOpsForField(field: string) {
 }
 
 function defaultValueForField(field: string) {
-  return field === 'type' ? 'debit' : ''
+  if (field === 'type') return 'debit'
+  if (field === 'status') return 'pending'
+  return ''
 }
 
 function newCondition(): RuleCondition {
@@ -156,6 +159,15 @@ function ConditionRow({
         >
           <option value="debit">{t('rules.typeExpense')}</option>
           <option value="credit">{t('rules.typeIncome')}</option>
+        </select>
+      ) : condition.field === 'status' ? (
+        <select
+          className={`${SELECT_CLASS} col-span-2 w-full min-w-0 sm:w-0 sm:flex-1`}
+          value={String(condition.value)}
+          onChange={(e) => onChange('value', e.target.value)}
+        >
+          <option value="pending">{t('rules.statusPending')}</option>
+          <option value="posted">{t('rules.statusPosted')}</option>
         </select>
       ) : condition.field === 'account_id' ? (
         <select
@@ -361,9 +373,9 @@ function RulePreviewPanel({
                         </td>
                         <td className={cn(
                           'whitespace-nowrap py-1.5 pr-2 text-right tabular-nums',
-                          item.will_change && item.type === 'credit' && 'text-emerald-600',
+                          item.will_change && (item.type === 'credit' ? 'text-emerald-600' : 'text-rose-500'),
                         )}>
-                          {mask(formatCurrency(Math.abs(item.amount), item.currency, locale))}
+                          {mask(formatSignedAmount(item.amount, item.type, item.currency, locale))}
                         </td>
                         <td className="py-1.5">
                           {item.will_change ? (
@@ -461,6 +473,13 @@ export function RuleDialog({
     initialData?.overwriteExistingCategories ?? false
   )
   const [previewOpen, setPreviewOpen] = useState(false)
+
+  // Signed amounts are not obvious from a bare number box, so say it once,
+  // right where the threshold is typed: income positive, expenses negative.
+  const hasAmountCondition = useMemo(
+    () => flattenConditions(conditions).some(c => c.field === 'amount'),
+    [conditions],
+  )
 
   function updateCondition(i: number, field: keyof RuleCondition, val: string | number) {
     setConditions(prev => prev.map((node, idx) => (
@@ -667,6 +686,9 @@ export function RuleDialog({
                   <Plus size={12} /> {t('rules.addGroup')}
                 </button>
               </div>
+              {hasAmountCondition && (
+                <p className="text-xs text-muted-foreground">{t('rules.amountSignHint')}</p>
+              )}
             </div>
           </div>
 
@@ -705,6 +727,7 @@ export function RuleDialog({
                               (category) => category.id === action.value
                             )}
                             placeholder={t('rules.selectCategory')}
+                            creatable
                             className={`${SELECT_CLASS} w-full`}
                           />
                         </div>
