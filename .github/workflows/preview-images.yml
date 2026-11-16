@@ -47,7 +47,8 @@ jobs:
           import os
           import subprocess
 
-          repo = "securo-finance/securo"
+          repo = os.environ["GITHUB_REPOSITORY"]
+          package_owner = repo.split("/", 1)[0].lower()
           pr_number = os.environ.get("PR_NUMBER", "").strip()
           force = os.environ.get("FORCE", "").lower() == "true"
 
@@ -93,8 +94,8 @@ jobs:
                   )
                   return result.returncode != 0
 
-              backend_tag = f"ghcr.io/tiagoflino/securo-backend:{tag}"
-              frontend_tag = f"ghcr.io/tiagoflino/securo-frontend:{tag}"
+              backend_tag = f"ghcr.io/{package_owner}/securo-backend:{tag}"
+              frontend_tag = f"ghcr.io/{package_owner}/securo-frontend:{tag}"
               build_backend = image_missing(backend_tag)
               build_frontend = image_missing(frontend_tag)
               if not build_backend and not build_frontend:
@@ -135,9 +136,9 @@ jobs:
       matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
     steps:
       - name: Check out pull request
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
-          repository: securo-finance/securo
+          repository: ${{ github.repository }}
           ref: refs/pull/${{ matrix.number }}/head
           fetch-depth: 1
           persist-credentials: false
@@ -162,7 +163,7 @@ jobs:
           push: true
           tags: ${{ matrix.backend_tag }}
           labels: |
-            org.opencontainers.image.source=https://github.com/securo-finance/securo
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ matrix.sha }}
           cache-from: type=gha,scope=preview-backend
           cache-to: type=gha,mode=max,scope=preview-backend
@@ -177,7 +178,7 @@ jobs:
           push: true
           tags: ${{ matrix.frontend_tag }}
           labels: |
-            org.opencontainers.image.source=https://github.com/securo-finance/securo
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ matrix.sha }}
           cache-from: type=gha,scope=preview-frontend
           cache-to: type=gha,mode=max,scope=preview-frontend
