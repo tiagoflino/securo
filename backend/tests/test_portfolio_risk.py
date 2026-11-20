@@ -40,3 +40,25 @@ def test_risk_free_rate_is_passed_through():
     assert without_rf is not None and with_rf is not None
     assert with_rf.sharpe is not None and without_rf.sharpe is not None
     assert with_rf.sharpe < without_rf.sharpe
+
+
+def test_a_monthly_series_is_not_annualized_as_if_it_were_daily():
+    # 13 monthly points over a year: 12 observations, so the effective
+    # periods per year is 12, not 252.
+    start = date(2025, 11, 20)
+    series = [
+        (date(2025, 11, 20), 0.0),
+        *(
+            (start + timedelta(days=30 * month), (1.01**month - 1) * 100)
+            for month in range(1, 13)
+        ),
+    ]
+
+    metrics = risk_for_cumulative_series(series)
+
+    assert metrics is not None
+    assert metrics.observations == 12
+    assert metrics.annualized_return == pytest.approx(1.01**12 - 1, rel=1e-6)
+    # A smooth 1%-per-month line has no dispersion, so the ratios stay undefined.
+    assert metrics.annualized_volatility == pytest.approx(0.0)
+    assert metrics.sharpe is None
