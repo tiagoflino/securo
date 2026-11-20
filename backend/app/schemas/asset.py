@@ -247,6 +247,21 @@ class BenchmarkMatch(BaseModel):
 BenchmarkSourceError = Literal["unavailable", "rate_limited", "no_data", "no_fx_rate"]
 
 
+class PortfolioRiskRead(BaseModel):
+    """Risk statistics for a performance series over the requested period."""
+
+    observations: int
+    annualized_return: Optional[float] = None
+    annualized_volatility: Optional[float] = None
+    #: Deepest fall from a running peak, as a negative fraction.
+    max_drawdown: Optional[float] = None
+    #: Distance from the running peak on the last day, as a negative fraction.
+    current_drawdown: Optional[float] = None
+    sharpe: Optional[float] = None
+    sortino: Optional[float] = None
+    calmar: Optional[float] = None
+
+
 class BenchmarkPerformanceRead(BaseModel):
     """Final metrics for one of the requested comparison indices."""
 
@@ -260,6 +275,7 @@ class BenchmarkPerformanceRead(BaseModel):
     benchmark_return: Optional[float] = None
     excess_return: Optional[float] = None
     source_error: Optional[BenchmarkSourceError] = None
+    risk: Optional[PortfolioRiskRead] = None
 
 
 class PortfolioPerformancePoint(BaseModel):
@@ -282,6 +298,7 @@ class PortfolioPerformanceRead(BaseModel):
     excess_return: Optional[float] = None
     benchmarks: list[BenchmarkPerformanceRead] = Field(default_factory=list)
     points: list[PortfolioPerformancePoint] = Field(default_factory=list)
+    risk: Optional[PortfolioRiskRead] = None
 
 
 class AssetValueCreate(BaseModel):

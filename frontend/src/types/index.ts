@@ -1441,6 +1441,17 @@ export interface PortfolioPerformancePoint {
   benchmarks: Record<string, number>
 }
 
+export interface PortfolioRisk {
+  observations: number
+  annualized_return: number | null
+  annualized_volatility: number | null
+  max_drawdown: number | null
+  current_drawdown: number | null
+  sharpe: number | null
+  sortino: number | null
+  calmar: number | null
+}
+
 export interface BenchmarkPerformance {
   key: string
   symbol: string
@@ -1451,6 +1462,7 @@ export interface BenchmarkPerformance {
   // First date this benchmark is compared from. Later than the response's
   // start_date when the benchmark's history begins after the portfolio's.
   start_date: string | null
+  risk?: PortfolioRisk | null
 }
 
 export interface HoldingTradeImport {
@@ -1481,6 +1493,7 @@ export interface PortfolioPerformance {
   excess_return: number | null
   benchmarks: BenchmarkPerformance[]
   points: PortfolioPerformancePoint[]
+  risk?: PortfolioRisk | null
 }
 
 export interface AssetPriceRefreshResult {

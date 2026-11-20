@@ -370,6 +370,14 @@ export function PortfolioPerformance({
       }),
     [locale],
   )
+  const ratioFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [locale],
+  )
   // Axis ticks keep only the decimals they need, so a chart that moves less
   // than 1% still gets distinct labels (0.25%, 0.5%…).
   const axisFormatter = useMemo(
@@ -388,6 +396,10 @@ export function PortfolioPerformance({
     })
   const formatReturn = (value: number | null | undefined) =>
     value == null ? '—' : mask(percentFormatter.format(value / 100))
+  const formatRiskPercent = (value: number | null | undefined) =>
+    value == null ? '—' : mask(percentFormatter.format(value))
+  const formatRiskRatio = (value: number | null | undefined) =>
+    value == null ? '—' : ratioFormatter.format(value)
 
   const chooseBenchmark = (benchmark: BenchmarkMatch) => {
     if (selectedKeys.has(benchmarkKey(benchmark))) return
@@ -1433,6 +1445,63 @@ export function PortfolioPerformance({
           </>
         )}
       </div>
+      {data && (data.risk || data.benchmarks.some((item) => item.risk)) && (
+        <div className="border-t border-border px-4 py-4 sm:px-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-sm font-semibold text-foreground">
+              {t('assets.performanceRisk')}
+            </h3>
+            <span className="text-xs text-muted-foreground">
+              {t('assets.performanceRiskHint')}
+            </span>
+          </div>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[36rem] text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="py-1 pr-3 font-medium">{t('assets.performanceRiskSeries')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('assets.performanceRiskVolatility')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('assets.performanceRiskMaxDrawdown')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('assets.performanceRiskSharpe')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('assets.performanceRiskSortino')}</th>
+                  <th className="py-1 font-medium">{t('assets.performanceRiskCalmar')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    key: 'portfolio',
+                    name: t('assets.performanceRiskPortfolio'),
+                    risk: data.risk,
+                  },
+                  ...data.benchmarks
+                    .filter((item) => item.risk)
+                    .map((item) => ({ key: item.key, name: item.symbol, risk: item.risk })),
+                ].map((row) => (
+                  <tr key={row.key} className="border-t border-border/60">
+                    <td className="py-1.5 pr-3 font-medium">{row.name}</td>
+                    <td className="py-1.5 pr-3 tabular-nums">
+                      {formatRiskPercent(row.risk?.annualized_volatility)}
+                    </td>
+                    <td className="py-1.5 pr-3 tabular-nums">
+                      {formatRiskPercent(row.risk?.max_drawdown)}
+                    </td>
+                    <td className="py-1.5 pr-3 tabular-nums">
+                      {formatRiskRatio(row.risk?.sharpe)}
+                    </td>
+                    <td className="py-1.5 pr-3 tabular-nums">
+                      {formatRiskRatio(row.risk?.sortino)}
+                    </td>
+                    <td className="py-1.5 tabular-nums">
+                      {formatRiskRatio(row.risk?.calmar)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       {canManage && tradeImport.data?.available && !tradeImport.data.enabled && (
         <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-6">
           <p className="min-w-0 flex-1 basis-64 text-xs leading-relaxed text-muted-foreground">
