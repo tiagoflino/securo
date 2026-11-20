@@ -380,6 +380,14 @@ export function PortfolioPerformance({
       }),
     [locale],
   )
+  const ratioFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [locale],
+  )
   // Axis ticks keep only the decimals they need, so a chart that moves less
   // than 1% still gets distinct labels (0.25%, 0.5%…).
   const axisFormatter = useMemo(
@@ -401,7 +409,7 @@ export function PortfolioPerformance({
   const formatRiskPercent = (value: number | null | undefined) =>
     value == null ? '—' : mask(percentFormatter.format(value))
   const formatRiskRatio = (value: number | null | undefined) =>
-    value == null ? '—' : value.toFixed(2)
+    value == null ? '—' : ratioFormatter.format(value)
 
   const chooseBenchmark = (benchmark: BenchmarkMatch) => {
     if (selectedKeys.has(benchmarkKey(benchmark))) return
