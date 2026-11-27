@@ -209,6 +209,55 @@ describe('PortfolioPerformance', () => {
     expect(screen.queryByRole('button', { name: 'Import trades' })).not.toBeInTheDocument()
   })
 
+  it('shows risk for the same observed window as the returns', async () => {
+    vi.mocked(assets.performance).mockResolvedValue({
+      ...performanceData,
+      risk: {
+        start_date: '2026-01-07',
+        observations: 2,
+        annualized_return: 12.5,
+        annualized_volatility: 0.081,
+        max_drawdown: -0.032,
+        current_drawdown: -0.011,
+        sharpe: 1.2,
+        sortino: 1.8,
+        calmar: 3.9,
+      },
+      benchmarks: performanceData.benchmarks.map((benchmark) =>
+        benchmark.symbol === '^IXIC'
+          ? {
+              ...benchmark,
+              risk: {
+                start_date: '2026-01-07',
+                observations: 2,
+                annualized_return: 15.75,
+                annualized_volatility: 0.125,
+                max_drawdown: -0.064,
+                current_drawdown: -0.022,
+                sharpe: 0.9,
+                sortino: 1.3,
+                calmar: 2.5,
+              },
+            }
+          : benchmark,
+      ),
+    })
+    renderPerformance()
+
+    const heading = await screen.findByRole('heading', { name: 'Risk' })
+    const section = heading.closest('div')?.parentElement
+    expect(section).not.toBeNull()
+    expect(
+      within(section as HTMLElement).getByText(
+        'Measured from Jan 7, 2026 to Sep 29, 2026 over the same scope as the return above.',
+      ),
+    ).toBeInTheDocument()
+    expect(within(section as HTMLElement).getByText('Portfolio')).toBeInTheDocument()
+    expect(within(section as HTMLElement).getByText('+8.10%')).toBeInTheDocument()
+    expect(within(section as HTMLElement).getByText('^IXIC')).toBeInTheDocument()
+    expect(within(section as HTMLElement).getByText('+12.50%')).toBeInTheDocument()
+  })
+
   it('lists holdings whose trades could not be imported and retries their connections', async () => {
     const issue = (
       connection_id: string,

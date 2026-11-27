@@ -608,6 +608,62 @@ async def test_later_manual_asset_is_a_contribution_not_performance(
 
 
 @pytest.mark.asyncio
+async def test_risk_starts_when_the_scope_has_an_observed_valuation(
+    session: AsyncSession, test_user: User, test_workspace
+):
+    end = date.today()
+    start = end - timedelta(days=30)
+    observed = end - timedelta(days=10)
+    asset = Asset(
+        id=uuid.uuid4(),
+        user_id=test_user.id,
+        workspace_id=test_workspace.id,
+        name="Pending valuation",
+        type="fund",
+        currency="BRL",
+        valuation_method="manual",
+        purchase_date=start,
+        purchase_price=Decimal("100"),
+    )
+    session.add(asset)
+    await session.flush()
+    session.add_all(
+        [
+            AssetValue(
+                asset_id=asset.id,
+                workspace_id=test_workspace.id,
+                amount=Decimal("100"),
+                date=observed,
+                source="manual",
+            ),
+            AssetValue(
+                asset_id=asset.id,
+                workspace_id=test_workspace.id,
+                amount=Decimal("110"),
+                date=end,
+                source="manual",
+            ),
+        ]
+    )
+    await session.commit()
+
+    result = await get_portfolio_performance_multi(
+        session,
+        test_workspace.id,
+        test_user.id,
+        "BRL",
+        [],
+        "3m",
+        end_date=end,
+    )
+
+    assert result.start_date == start
+    assert result.risk is not None
+    assert result.risk.start_date == observed
+    assert result.risk.observations == 1
+
+
+@pytest.mark.asyncio
 async def test_sparse_synced_history_jumps_to_time_weighted_return(
     session: AsyncSession, test_user: User, test_workspace
 ):
