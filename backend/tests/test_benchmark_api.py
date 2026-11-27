@@ -143,6 +143,17 @@ async def test_performance_endpoint_returns_aligned_metrics(
             "excess_return": pytest.approx(0.0),
             "source_error": None,
             "start_date": data["start_date"],
+                "risk": {
+                    "start_date": (TODAY - timedelta(days=30)).isoformat(),
+                    "observations": 1,
+                    "annualized_return": None,
+                    "annualized_volatility": None,
+                    "max_drawdown": pytest.approx(0.0),
+                    "current_drawdown": pytest.approx(0.0),
+                    "sharpe": None,
+                    "sortino": None,
+                    "calmar": None,
+                },
         }
     ]
     assert data["points"][-1]["benchmarks"]["yahoo:^TEST"] == pytest.approx(10.0)
