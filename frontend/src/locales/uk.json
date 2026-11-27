@@ -2452,7 +2452,7 @@
     "performanceSelectAssets": "Вибрати гаманці та активи",
     "performanceBenchmarks": "Індекси порівняння",
     "performanceRisk": "Ризик",
-    "performanceRiskHint": "Той самий період і обсяг, що й дохідність вище.",
+    "performanceRiskHint": "Вимірюється з {{start}} до {{end}} в тому самому обсязі, що й дохідність вище.",
     "performanceRiskSeries": "Ряд",
     "performanceRiskPortfolio": "Портфель",
     "performanceRiskVolatility": "Волатильність",

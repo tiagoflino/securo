@@ -2520,7 +2520,7 @@
     "performanceSelectAssets": "Wybierz portfele i aktywa",
     "performanceBenchmarks": "Indeksy porównawcze",
     "performanceRisk": "Ryzyko",
-    "performanceRiskHint": "Ten sam okres i zakres co zwrot powyżej.",
+    "performanceRiskHint": "Mierzone od {{start}} do {{end}} w tym samym zakresie co zwrot powyżej.",
     "performanceRiskSeries": "Szereg",
     "performanceRiskPortfolio": "Portfel",
     "performanceRiskVolatility": "Zmienność",

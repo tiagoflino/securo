@@ -2417,7 +2417,7 @@
     "performanceSelectAssets": "Επιλέξτε πορτοφόλια και περιουσιακά στοιχεία",
     "performanceBenchmarks": "Δείκτες αναφοράς",
     "performanceRisk": "Κίνδυνος",
-    "performanceRiskHint": "Ίδια περίοδος και εύρος με την απόδοση παραπάνω.",
+    "performanceRiskHint": "Μετράται από {{start}} έως {{end}} με το ίδιο εύρος με την απόδοση παραπάνω.",
     "performanceRiskSeries": "Σειρά",
     "performanceRiskPortfolio": "Χαρτοφυλάκιο",
     "performanceRiskVolatility": "Μεταβλητότητα",

@@ -1467,7 +1467,10 @@ export function PortfolioPerformance({
               {t('assets.performanceRisk')}
             </h3>
             <span className="text-xs text-muted-foreground">
-              {t('assets.performanceRiskHint')}
+              {t('assets.performanceRiskHint', {
+                start: formatDate(data.risk?.start_date ?? data.start_date),
+                end: formatDate(data.end_date),
+              })}
             </span>
           </div>
           <div className="mt-3 overflow-x-auto">

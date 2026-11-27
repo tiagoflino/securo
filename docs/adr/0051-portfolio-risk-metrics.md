@@ -1,4 +1,4 @@
-# 0027. Risk metrics on the performance series
+# 0051. Risk metrics on the performance series
 
 Status: proposed
 
@@ -16,12 +16,17 @@ statistics need nothing else.
 ## Decision
 
 Add a pure module, `backend/app/services/risk_metrics.py`, used by the API,
-the MCP server and later reports:
+the MCP server and later reports. A thin adapter,
+`backend/app/services/portfolio_risk.py`, converts the performance service's
+cumulative percentage series into the index levels the module consumes and
+derives the annualization frequency from the dates actually present:
 
 - simple daily returns, not log returns: the performance service produces a
   time-weighted index from simple returns, and mixing the two definitions
   changes the result by a few percent on long windows.
 - 252 periods per year by default, configurable for calendar-daily series.
+  The adapter uses the observed sampling frequency, because some performance
+  windows contain monthly valuation snapshots rather than trading days.
 - annualized volatility: sample standard deviation of daily returns × √252.
 - Sharpe: mean daily excess return over the daily risk-free rate, divided by
   the daily standard deviation, × √252.
@@ -38,10 +43,17 @@ the MCP server and later reports:
 - fewer than two observations, non-positive values and non-finite numbers
   raise `RiskMetricsError` instead of yielding a number.
 
-The first change ships the module and its tests only. A follow-up, once
-#1096 lands, feeds the time-weighted index and each benchmark series into it,
-exposes the numbers on the performance response and renders a Risk section in
-the Performance tab.
+The performance response exposes the metrics for the portfolio and every
+benchmark, and the Performance tab renders them beside the return chart. The
+module remains free of a database, clock and network so agents, MCP clients
+and later reports can reuse the same implementation.
+
+Risk starts at the performance engine's observation boundary, the first date
+on which the holdings already introduced have real valuations. Earlier flat
+points are a display device for the chart, not observations: treating them as
+zero-return days understates volatility. Each benchmark is measured from the
+same start date so the table compares equal windows, and the response includes
+that start date for display.
 
 ## Consequences
 

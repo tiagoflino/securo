@@ -2452,7 +2452,7 @@
     "performanceSelectAssets": "Выбрать кошельки и активы",
     "performanceBenchmarks": "Индексы сравнения",
     "performanceRisk": "Риск",
-    "performanceRiskHint": "Тот же период и охват, что и доходность выше.",
+    "performanceRiskHint": "Измерено с {{start}} по {{end}} в том же охвате, что и доходность выше.",
     "performanceRiskSeries": "Ряд",
     "performanceRiskPortfolio": "Портфель",
     "performanceRiskVolatility": "Волатильность",

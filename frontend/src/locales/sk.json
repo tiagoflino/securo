@@ -2551,7 +2551,7 @@
     "performanceSelectAssets": "Vyberte peňaženky a aktíva",
     "performanceBenchmarks": "Referenčné indexy",
     "performanceRisk": "Riziko",
-    "performanceRiskHint": "Rovnaké obdobie a rozsah ako výnos vyššie.",
+    "performanceRiskHint": "Merané od {{start}} do {{end}} v rovnakom rozsahu ako výnos vyššie.",
     "performanceRiskSeries": "Séria",
     "performanceRiskPortfolio": "Portfólio",
     "performanceRiskVolatility": "Volatilita",

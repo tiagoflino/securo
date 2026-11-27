@@ -2414,7 +2414,7 @@
     "performanceSelectAssets": "Wallets und Anlagen auswählen",
     "performanceBenchmarks": "Vergleichsindizes",
     "performanceRisk": "Risiko",
-    "performanceRiskHint": "Gleicher Zeitraum und Umfang wie die Rendite oben.",
+    "performanceRiskHint": "Gemessen vom {{start}} bis {{end}} im selben Umfang wie die Rendite oben.",
     "performanceRiskSeries": "Reihe",
     "performanceRiskPortfolio": "Portfolio",
     "performanceRiskVolatility": "Volatilität",

@@ -2436,7 +2436,7 @@
     "performanceSelectAssets": "בחר ארנקים ונכסים",
     "performanceBenchmarks": "מדדי ייחוס",
     "performanceRisk": "סיכון",
-    "performanceRiskHint": "אותה תקופה והיקף כמו התשואה למעלה.",
+    "performanceRiskHint": "נמדד מ־{{start}} עד {{end}} באותו היקף כמו התשואה למעלה.",
     "performanceRiskSeries": "סדרה",
     "performanceRiskPortfolio": "תיק",
     "performanceRiskVolatility": "תנודתיות",

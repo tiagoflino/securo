@@ -2419,7 +2419,7 @@
     "performanceSelectAssets": "Wallets en activa selecteren",
     "performanceBenchmarks": "Vergelijkingsindices",
     "performanceRisk": "Risico",
-    "performanceRiskHint": "Zelfde periode en bereik als het rendement hierboven.",
+    "performanceRiskHint": "Gemeten van {{start}} tot {{end}} met dezelfde reikwijdte als het rendement hierboven.",
     "performanceRiskSeries": "Reeks",
     "performanceRiskPortfolio": "Portefeuille",
     "performanceRiskVolatility": "Volatiliteit",

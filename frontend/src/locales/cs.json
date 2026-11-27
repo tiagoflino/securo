@@ -2565,7 +2565,7 @@
     "performanceSelectAssets": "Vyberte peněženky a aktiva",
     "performanceBenchmarks": "Benchmarky",
     "performanceRisk": "Riziko",
-    "performanceRiskHint": "Stejné období a rozsah jako výnos výše.",
+    "performanceRiskHint": "Měřeno od {{start}} do {{end}} ve stejném rozsahu jako výnos výše.",
     "performanceRiskSeries": "Řada",
     "performanceRiskPortfolio": "Portfolio",
     "performanceRiskVolatility": "Volatilita",

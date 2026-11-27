@@ -2422,7 +2422,7 @@
     "performanceSelectAssets": "Sélectionner des portefeuilles et actifs",
     "performanceBenchmarks": "Indices de référence",
     "performanceRisk": "Risque",
-    "performanceRiskHint": "Même période et périmètre que le rendement ci-dessus.",
+    "performanceRiskHint": "Mesuré du {{start}} au {{end}} avec le même périmètre que le rendement ci-dessus.",
     "performanceRiskSeries": "Série",
     "performanceRiskPortfolio": "Portefeuille",
     "performanceRiskVolatility": "Volatilité",

@@ -2417,7 +2417,7 @@
     "performanceSelectAssets": "वॉलेट और संपत्तियाँ चुनें",
     "performanceBenchmarks": "बेंचमार्क",
     "performanceRisk": "जोखिम",
-    "performanceRiskHint": "ऊपर के रिटर्न जैसी ही अवधि और सीमा।",
+    "performanceRiskHint": "ऊपर के रिटर्न जैसी ही सीमा में {{start}} से {{end}} तक मापा गया।",
     "performanceRiskSeries": "श्रृंखला",
     "performanceRiskPortfolio": "पोर्टफोलियो",
     "performanceRiskVolatility": "अस्थिरता",

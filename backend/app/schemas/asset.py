@@ -267,6 +267,7 @@ BenchmarkSourceError = Literal["unavailable", "rate_limited", "no_data", "no_fx_
 class PortfolioRiskRead(BaseModel):
     """Risk statistics for a performance series over the requested period."""
 
+    start_date: _date
     observations: int
     annualized_return: Optional[float] = None
     annualized_volatility: Optional[float] = None

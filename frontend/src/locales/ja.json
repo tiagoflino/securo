@@ -2417,7 +2417,7 @@
     "performanceSelectAssets": "ウォレットと資産を選択",
     "performanceBenchmarks": "ベンチマーク",
     "performanceRisk": "リスク",
-    "performanceRiskHint": "上のリターンと同じ期間と範囲。",
+    "performanceRiskHint": "上のリターンと同じ範囲で {{start}} から {{end}} までを測定。",
     "performanceRiskSeries": "系列",
     "performanceRiskPortfolio": "ポートフォリオ",
     "performanceRiskVolatility": "ボラティリティ",

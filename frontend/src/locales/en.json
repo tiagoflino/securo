@@ -2413,7 +2413,7 @@
     "performanceSelectAssets": "Select wallets and assets",
     "performanceBenchmarks": "Benchmarks",
     "performanceRisk": "Risk",
-    "performanceRiskHint": "Same period and scope as the return above.",
+    "performanceRiskHint": "Measured from {{start}} to {{end}} over the same scope as the return above.",
     "performanceRiskSeries": "Series",
     "performanceRiskPortfolio": "Portfolio",
     "performanceRiskVolatility": "Volatility",

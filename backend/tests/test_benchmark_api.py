@@ -144,6 +144,7 @@ async def test_performance_endpoint_returns_aligned_metrics(
             "source_error": None,
             "start_date": data["start_date"],
                 "risk": {
+                    "start_date": (TODAY - timedelta(days=30)).isoformat(),
                     "observations": 1,
                     "annualized_return": None,
                     "annualized_volatility": None,

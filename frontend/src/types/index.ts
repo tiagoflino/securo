@@ -1775,6 +1775,7 @@ export interface PortfolioPerformancePoint {
 }
 
 export interface PortfolioRisk {
+  start_date: string
   observations: number
   annualized_return: number | null
   annualized_volatility: number | null

@@ -2421,7 +2421,7 @@
     "performanceSelectAssets": "Selecionar carteiras e ativos",
     "performanceBenchmarks": "Índices de referência",
     "performanceRisk": "Risco",
-    "performanceRiskHint": "Mesmo período e âmbito do retorno acima.",
+    "performanceRiskHint": "Medido de {{start}} a {{end}} no mesmo âmbito do retorno acima.",
     "performanceRiskSeries": "Série",
     "performanceRiskPortfolio": "Carteira",
     "performanceRiskVolatility": "Volatilidade",

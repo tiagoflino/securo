@@ -2415,7 +2415,7 @@
     "performanceSelectAssets": "Válassz tárcákat és eszközöket",
     "performanceBenchmarks": "Benchmarkok",
     "performanceRisk": "Kockázat",
-    "performanceRiskHint": "Ugyanaz az időszak és hatókör, mint a fenti hozam.",
+    "performanceRiskHint": "Mérve {{start}} és {{end}} között, ugyanazzal a hatókörrel, mint a fenti hozam.",
     "performanceRiskSeries": "Sorozat",
     "performanceRiskPortfolio": "Portfólió",
     "performanceRiskVolatility": "Volatilitás",

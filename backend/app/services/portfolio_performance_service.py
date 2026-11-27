@@ -44,7 +44,10 @@ from app.services.risk_metrics import RiskMetrics
 logger = logging.getLogger(__name__)
 
 
-def _risk_read(metrics: Optional[RiskMetrics]) -> Optional[PortfolioRiskRead]:
+def _risk_read(
+    series: list[tuple[date, float]],
+    metrics: Optional[RiskMetrics],
+) -> Optional[PortfolioRiskRead]:
     """Serialize risk statistics, rounding like the returns next to them."""
 
     if metrics is None:
@@ -54,6 +57,7 @@ def _risk_read(metrics: Optional[RiskMetrics]) -> Optional[PortfolioRiskRead]:
         return round(value, 6) if value is not None else None
 
     return PortfolioRiskRead(
+        start_date=series[0][0],
         observations=metrics.observations,
         annualized_return=rounded(metrics.annualized_return),
         annualized_volatility=rounded(metrics.annualized_volatility),
@@ -1280,7 +1284,17 @@ async def get_portfolio_performance_multi(
         # Never substitute a different successful benchmark for a failed one.
         point.benchmark = point.benchmarks.get(primary_key) if primary_key else None
     portfolio_return = portfolio_returns[-1][1] if portfolio_returns else None
-    portfolio_risk = _risk_read(risk_for_cumulative_series(portfolio_returns))
+    # Early performance points can be synthetic flats while the selected
+    # holdings do not all have an observed valuation yet. Measuring their zero
+    # returns as volatility understates the risk of the period that follows,
+    # so both the portfolio and each benchmark use the same observed window.
+    risk_series = [
+        point for point in portfolio_returns if point[0] >= observation_boundary
+    ]
+    portfolio_risk = _risk_read(
+        risk_series,
+        risk_for_cumulative_series(risk_series),
+    )
     benchmark_metrics: list[BenchmarkPerformanceRead] = []
     for provider_name, symbol in benchmarks:
         key = f"{provider_name}:{symbol}"
@@ -1292,6 +1306,16 @@ async def get_portfolio_performance_multi(
             window_return = _return_since(portfolio_returns, benchmark_start)
             if window_return is not None:
                 excess_return = window_return - benchmark_return
+        benchmark_risk = None
+        if series:
+            benchmark_risk_series = [
+                point for point in series if point[0] >= risk_series[0][0]
+            ]
+            if benchmark_risk_series and benchmark_risk_series[0][0] == risk_series[0][0]:
+                benchmark_risk = _risk_read(
+                    benchmark_risk_series,
+                    risk_for_cumulative_series(benchmark_risk_series),
+                )
         benchmark_metrics.append(
             BenchmarkPerformanceRead(
                 key=key,
@@ -1303,11 +1327,7 @@ async def get_portfolio_performance_multi(
                 ),
                 excess_return=(round(excess_return, 6) if excess_return is not None else None),
                 source_error=source_errors.get(key),
-                risk=(
-                    _risk_read(risk_for_cumulative_series(series))
-                    if series
-                    else None
-                ),
+                risk=benchmark_risk,
             )
         )
     first_metric = benchmark_metrics[0] if benchmark_metrics else None
